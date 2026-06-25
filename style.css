@@ -1,0 +1,461 @@
+:root{--purple:#6417f3;--purple2:#8b5cf6;--ink:#080d36;--muted:#65708e;--bg:#f7f3ff;--line:#e7ddff;--green:#10a536;--orange:#f59e0b;--red:#ef4444}
+*{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,#fbfaff,#eee7ff);color:var(--ink)}
+.workspace{min-height:100vh;display:grid;grid-template-columns:310px 1fr;gap:22px;padding:24px}.panel{background:#fff;border:1px solid var(--line);border-radius:26px;padding:22px;box-shadow:0 20px 60px #4b20a31a;height:calc(100vh - 48px);position:sticky;top:24px;overflow:auto}.panel h1{margin:0;font-size:34px;color:var(--purple)}.panel p{margin:4px 0 18px;color:var(--muted)}.primary{width:100%;border:0;border-radius:16px;background:linear-gradient(135deg,var(--purple2),var(--purple));color:#fff;font-weight:800;font-size:16px;padding:14px 16px;cursor:pointer}.hint{font-size:13px;line-height:1.35;background:#f4efff;border-radius:14px;padding:12px;margin:14px 0;color:#4b3f74}#screenList{display:flex;flex-direction:column;gap:7px}.screenBtn{border:1px solid var(--line);background:#fff;border-radius:13px;padding:10px 12px;text-align:left;color:#303653;cursor:pointer;font-weight:650}.screenBtn.active{background:var(--purple);color:white;border-color:var(--purple)}
+.phoneArea{display:flex;align-items:flex-start;justify-content:center}.phoneFrame{position:relative;width:min(440px,calc(100vw - 370px));max-height:calc(100vh - 48px);background:#fff;border-radius:38px;box-shadow:0 28px 70px #30127333;overflow-y:auto;overflow-x:hidden;scroll-behavior:smooth}#screenStage{position:relative;width:100%;line-height:0}#screenImg{display:block;width:100%;height:auto;user-select:none}#hotspots,#selectionLayer{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}.hotspot{pointer-events:auto}.hotspot{position:absolute;border:0;background:transparent;cursor:pointer;border-radius:14px;z-index:5}.hotspot:hover{outline:3px solid #7c3aed99;background:#7c3aed16}.hotspot:focus-visible{outline:3px solid var(--orange)}.pulse{animation:pulse 1.5s infinite}@keyframes pulse{50%{box-shadow:0 0 0 10px #8b5cf622}}.chip{position:absolute;z-index:7;border:2px solid var(--purple);background:#f4edffcc;color:var(--purple);border-radius:12px;pointer-events:none;box-shadow:0 0 0 3px #fff8}.chip.green{border-color:var(--green);background:#eaf9eecc;color:var(--green)}.chip.orange{border-color:var(--orange);background:#fff7e6cc;color:var(--orange)}.chip.red{border-color:var(--red);background:#fff1f1cc;color:var(--red)}#toast{position:absolute;left:50%;bottom:16px;transform:translateX(-50%) translateY(30px);background:#12162fcc;color:#fff;border-radius:999px;padding:10px 16px;font-size:13px;font-weight:700;opacity:0;transition:.25s;white-space:nowrap}#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (max-width:850px){.workspace{grid-template-columns:1fr;padding:12px}.panel{position:static;height:auto}.phoneFrame{width:min(420px,100%)}}
+
+.hotspot.activeHint{outline:2px solid var(--purple);background:#8b5cf61a}
+.chip.heart{border-color:#6417f3;background:#6417f3cc;border-radius:50%;box-shadow:0 0 0 4px #fff8}
+.chip.heart::after{content:'♥';position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-weight:900;font-size:20px;line-height:1}
+
+/* Animación para la pestaña No leídos */
+.chip.unreadTab{
+  border-color:var(--purple);
+  background:linear-gradient(135deg,#8b5cf6dd,#6417f3dd);
+  color:white;
+  border-radius:22px;
+  animation:unreadSlide .42s cubic-bezier(.2,.9,.3,1.2), unreadGlow 1.25s ease-in-out 1;
+  box-shadow:0 10px 28px #6417f344,0 0 0 3px #fff8;
+}
+.chip.unreadTab::after{
+  content:'2';
+  position:absolute;
+  right:23%;
+  top:50%;
+  transform:translateY(-50%);
+  width:22px;
+  height:22px;
+  border-radius:999px;
+  background:#fff;
+  color:var(--purple);
+  display:grid;
+  place-items:center;
+  font-weight:900;
+  font-size:13px;
+  line-height:1;
+  animation:badgeBounce .55s ease .18s both;
+}
+.chip.todosTab{
+  border-color:var(--purple);
+  background:linear-gradient(135deg,#8b5cf6dd,#6417f3dd);
+  border-radius:22px;
+  animation:tabPop .25s ease;
+  box-shadow:0 10px 28px #6417f333,0 0 0 3px #fff8;
+}
+@keyframes unreadSlide{
+  0%{transform:translateX(-16px) scale(.96);opacity:.55}
+  70%{transform:translateX(3px) scale(1.02);opacity:1}
+  100%{transform:translateX(0) scale(1);opacity:1}
+}
+@keyframes unreadGlow{
+  0%,100%{box-shadow:0 10px 28px #6417f344,0 0 0 3px #fff8}
+  50%{box-shadow:0 10px 30px #6417f366,0 0 0 9px #8b5cf622}
+}
+@keyframes badgeBounce{
+  0%{transform:translateY(-50%) scale(.4);opacity:0}
+  60%{transform:translateY(-50%) scale(1.2);opacity:1}
+  100%{transform:translateY(-50%) scale(1)}
+}
+@keyframes tabPop{
+  0%{transform:scale(.96);opacity:.7}
+  100%{transform:scale(1);opacity:1}
+}
+.messageFade{animation:messageFade .35s ease both}
+@keyframes messageFade{from{opacity:.35;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Calificación: estrellas progresivas sin texto inferior */
+.ratingCover{
+  position:absolute;
+  z-index:6;
+  background:linear-gradient(180deg,#fff 0%,#fff 72%,#fffdfd 100%);
+  border-radius:18px;
+  pointer-events:none;
+}
+.ratingStar{
+  position:absolute;
+  z-index:9;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  font-size:36px;
+  line-height:1;
+  display:grid;
+  place-items:center;
+  padding:0;
+  pointer-events:auto;
+  transition:transform .14s ease, color .14s ease, text-shadow .14s ease;
+  -webkit-text-stroke:1px currentColor;
+}
+.ratingStar.filled{ color:#f59e0b; -webkit-text-stroke:0; text-shadow:0 5px 12px rgba(245,158,11,.20); animation:starPop .16s ease; }
+.ratingStar.empty{ color:#9ca3af; -webkit-text-stroke:1.2px #9ca3af; }
+.ratingStar:hover{ transform:scale(1.12); }
+.ratingStar:active{ transform:scale(.92); }
+
+@keyframes starPop{0%{transform:scale(.85)}70%{transform:scale(1.13)}100%{transform:scale(1)}}
+
+
+/* Perfil del cuidador: pestañas tipo Figma con texto activo y subrayado */
+.caregiverTabs{
+  position:absolute;
+  z-index:8;
+  background:#fff;
+  border-bottom:1px solid #ebe7f5;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  align-items:center;
+  pointer-events:none;
+  line-height:1;
+}
+.caregiverTabs .tabItem{
+  position:relative;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  font-weight:750;
+  color:#77738d;
+  white-space:nowrap;
+}
+.caregiverTabs .tabItem.active{
+  color:var(--purple);
+}
+.caregiverTabs .tabItem.active::after{
+  content:'';
+  position:absolute;
+  left:12%;
+  right:12%;
+  bottom:0;
+  height:2.5px;
+  border-radius:999px;
+  background:var(--purple);
+  animation:tabUnderline .28s ease both;
+}
+@keyframes tabUnderline{from{transform:scaleX(.35);opacity:.4}to{transform:scaleX(1);opacity:1}}
+
+/* Mis reservas: mismas pestañas que Perfil del cuidador */
+.reservationTabs{
+  border-bottom:1px solid #ebe7f5;
+  box-shadow:0 4px 10px rgba(100,23,243,.04);
+}
+.reservationTabs .tabItem{
+  font-size:12px;
+  font-weight:750;
+}
+
+/* Selecciones tipo pantalla 15 para pantallas 8, 9 y 17 */
+.chip.choice{
+  border:1.5px solid var(--purple);
+  background:var(--purple2);
+  color:#fff;
+  border-radius:14px;
+  box-shadow:none;
+  animation:choiceSlide .24s ease both;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  line-height:1.1;
+  font-weight:750;
+  font-size:12px;
+  padding:0 6px;
+}
+.chip.choice span{position:relative;z-index:2;color:#fff;pointer-events:none}
+.chip.choice.dateChoice{border-radius:999px;font-size:11px;padding:0}
+.chip.choice.timeChoice{border-radius:10px;font-size:10px}
+.chip.choice.petChoice,.chip.choice.unusualChoice{border-radius:14px}
+.chip.choice.urgencyChoice{border-radius:12px}
+.chip.choice.red{border-color:var(--purple);background:var(--purple2);box-shadow:none}
+.chip.choice.orange{border-color:var(--purple);background:var(--purple2);box-shadow:none}
+.chip.choice.green{border-color:var(--purple);background:var(--purple2);box-shadow:none}
+@keyframes choiceSlide{
+  from{opacity:.55;transform:translateY(2px) scale(.98)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* Ajuste final solicitado: todos los grupos usan el mismo tono y estilo seleccionado de la app.
+   Sin glow, sin sombra morada y con deselección automática controlada por JavaScript. */
+.chip.choice,
+.chip.choice.red,
+.chip.choice.orange,
+.chip.choice.green{
+  border:1.5px solid var(--purple);
+  background:var(--purple2);
+  color:#fff;
+  box-shadow:none !important;
+  outline:none !important;
+  text-shadow:none;
+  transition:transform .22s ease, opacity .22s ease;
+}
+.chip.choice span{color:#fff;font-weight:750;}
+.chip.choice.dateChoice{border-radius:999px;}
+.chip.choice.timeChoice{border-radius:10px;}
+.chip.choice.petChoice,.chip.choice.unusualChoice,.chip.choice.urgencyChoice{border-radius:14px;}
+
+/* Pantalla 20: mismo componente de pestañas que pantalla 15 */
+.messageTabs{
+  grid-template-columns:1fr 1fr;
+  border-bottom:1px solid #ebe7f5;
+  box-shadow:0 4px 10px rgba(100,23,243,.04);
+}
+.messageTabs .tabItem{font-size:12px;font-weight:750;gap:6px;}
+.messageTabs .tabBadge{
+  min-width:16px;height:16px;border-radius:999px;
+  display:inline-grid;place-items:center;
+  padding:0 4px;margin-left:5px;
+  background:#ef4444;color:#fff;font-size:10px;font-weight:900;
+}
+.messageTabs .tabItem.active .tabBadge{background:var(--purple2);color:#fff;}
+
+/* Anula el estilo anterior de Todos / No leídos para que no aparezca brillo ni pastilla flotante */
+.chip.unreadTab,.chip.todosTab{display:none !important;box-shadow:none !important;animation:none !important;}
+
+/* Selección única final: mismo componente para Pantalla 8, 9 y 17 */
+.choiceOption{
+  position:absolute;
+  z-index:8;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  text-align:center;
+  line-height:1.05;
+  padding:0 7px;
+  border:1.6px solid var(--purple2);
+  background:#fff;
+  color:var(--purple);
+  border-radius:14px;
+  box-shadow:none;
+  pointer-events:none;
+  font-size:12px;
+  font-weight:780;
+  transition:background .22s ease,color .22s ease,border-color .22s ease,box-shadow .22s ease,transform .22s ease;
+}
+.choiceOption .choiceIcon,
+.choiceOption .choiceText{color:inherit;pointer-events:none;position:relative;z-index:2}
+.choiceOption .choiceIcon{font-size:14px;font-weight:900;line-height:1}
+.choiceOption.selected{
+  color:#fff;
+  border-color:var(--purple);
+  background:linear-gradient(135deg,var(--purple2),var(--purple));
+  box-shadow:0 8px 18px rgba(100,23,243,.22);
+  transform:translateY(-1px);
+}
+.choiceOption.selected .choiceIcon,
+.choiceOption.selected .choiceText{color:#fff}
+.choiceOption.dateChoice{border-radius:999px;font-size:10px;padding:0;gap:2px;flex-direction:column}
+.choiceOption.dateChoice .choiceIcon{font-size:9px;line-height:.8}
+.choiceOption.timeChoice{border-radius:10px;font-size:9px;gap:3px;padding:0 2px}
+.choiceOption.timeChoice .choiceIcon{font-size:9px}
+.choiceOption.petChoice{border-radius:14px}
+.choiceOption.unusualChoice{border-radius:14px;font-size:11px;flex-direction:column;gap:3px;padding:3px 6px}
+.choiceOption.unusualChoice .choiceIcon{font-size:16px}
+.choiceOption.urgencyChoice{border-radius:12px;font-size:11px}
+/* Se conserva el hotspot invisible por encima para el clic, pero no altera el estilo visual. */
+.hotspot:hover{outline:2px solid #7c3aed55;background:#7c3aed08}
+
+/* Ajuste de alineación Pantalla 8: fecha y hora */
+.choiceOption.dateChoice{
+  align-items:center;
+  justify-content:center;
+  min-width:0;
+}
+.choiceOption.timeChoice{
+  align-items:center;
+  justify-content:center;
+  min-width:0;
+  white-space:nowrap;
+}
+.choiceOption.timeChoice .choiceText{
+  line-height:1;
+}
+
+
+/* ===== Corrección real v3: componentes alineados sobre el ZIP original ===== */
+.fixCover{
+  position:absolute;z-index:8;pointer-events:none;
+  background:#fff;border-radius:16px;
+}
+.fixCover.soft{background:#fff;box-shadow:0 1px 0 rgba(100,23,243,.04) inset;}
+.choiceOption{
+  z-index:10 !important;
+  height:auto;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  box-shadow:none !important;
+  transform:none !important;
+  background:#fff !important;
+  border:1.5px solid #8b5cf6 !important;
+  color:#6417f3 !important;
+  overflow:hidden;
+}
+.choiceOption.selected{
+  background:linear-gradient(135deg,#8b5cf6,#6417f3) !important;
+  border-color:#6417f3 !important;
+  color:#fff !important;
+}
+.choiceOption .choiceIcon,.choiceOption .choiceText{color:inherit !important;line-height:1.08 !important;}
+.choiceOption.dateChoice{border-radius:999px !important;font-size:12px !important;gap:0 !important;flex-direction:column !important;padding:0 !important;}
+.choiceOption.dateChoice .choiceIcon{display:none !important;}
+.choiceOption.timeChoice{border-radius:10px !important;font-size:10.5px !important;gap:0 !important;padding:0 2px !important;white-space:nowrap !important;}
+.choiceOption.timeChoice .choiceIcon{display:none !important;}
+.choiceOption.petChoice{border-radius:14px !important;font-size:12px !important;gap:6px !important;}
+.choiceOption.petChoice .choiceIcon{font-size:16px !important;}
+.choiceOption.unusualChoice{border-radius:14px !important;font-size:12px !important;gap:5px !important;flex-direction:column !important;padding:5px !important;}
+.choiceOption.unusualChoice .choiceIcon{font-size:18px !important;}
+.choiceOption.urgencyChoice{border-radius:12px !important;font-size:12px !important;gap:5px !important;}
+.choiceOption.urgencyChoice .choiceIcon{font-size:13px !important;}
+.hotspot{z-index:20 !important;}
+.hotspot:hover{outline:2px solid rgba(100,23,243,.25) !important;background:rgba(139,92,246,.06) !important;}
+.heartFix{
+  position:absolute;z-index:10;pointer-events:none;
+  display:grid;place-items:center;
+  border-radius:999px;background:#fff;
+  color:#6417f3;font-size:22px;font-weight:900;line-height:1;
+  box-shadow:0 1px 7px rgba(16,24,40,.08);
+}
+.heartFix::after{content:'♥';transform:translateY(-1px);}
+
+
+/* ===== Corrección final Pantalla 9 =====
+   Botones estables: no muestran texto extra, no cambian de tamaño y no se desplazan al seleccionar. */
+.choiceOption.p9FixedChoice{
+  position:absolute;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  text-align:center !important;
+  min-width:0 !important;
+  box-sizing:border-box !important;
+  margin:0 !important;
+  padding:0 8px !important;
+  border:1.6px solid #8b5cf6 !important;
+  border-radius:14px !important;
+  background:#fff !important;
+  color:#6417f3 !important;
+  font-size:12px !important;
+  font-weight:800 !important;
+  line-height:1 !important;
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  box-shadow:none !important;
+  outline:none !important;
+  transform:none !important;
+  animation:none !important;
+  transition:background .18s ease,color .18s ease,border-color .18s ease !important;
+}
+.choiceOption.p9FixedChoice.selected{
+  background:linear-gradient(135deg,#8b5cf6,#6417f3) !important;
+  border-color:#6417f3 !important;
+  color:#fff !important;
+  box-shadow:none !important;
+  transform:none !important;
+}
+.choiceOption.p9FixedChoice .choiceText{
+  display:block !important;
+  width:100% !important;
+  color:inherit !important;
+  line-height:1 !important;
+  margin:0 !important;
+  padding:0 !important;
+}
+.choiceOption.p9FixedChoice .choiceIcon{display:none !important;}
+
+/* Ajuste final Pantalla 9: los botones Sí/No quedan fijos y no se desplazan */
+.choiceOption.p9FixedChoice:hover{transform:none !important; box-shadow:none !important;}
+
+/* ===== Corrección Pantalla 17 v3: urgencia equilibrada y botón Enviar reporte centrado ===== */
+.choiceOption.compactUrgency{
+  min-height:0 !important;
+  border-radius:12px !important;
+  font-size:12px !important;
+  padding:0 8px !important;
+  gap:6px !important;
+  line-height:1 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  box-sizing:border-box !important;
+  transform:none !important;
+}
+.choiceOption.compactUrgency .choiceIcon{font-size:13px !important;line-height:1 !important;display:inline-flex;align-items:center;}
+.choiceOption.compactUrgency .choiceText{line-height:1 !important;display:inline-flex;align-items:center;}
+.sendReportButton{
+  position:absolute;
+  z-index:10;
+  pointer-events:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  box-sizing:border-box;
+  border-radius:9px;
+  background:linear-gradient(135deg,#7c3aed,#5200e8);
+  color:#fff;
+  font-size:13px;
+  font-weight:800;
+  line-height:1;
+  box-shadow:0 4px 10px rgba(100,23,243,.18);
+  overflow:hidden;
+  text-align:center;
+}
+.sendReportButton span{font-size:14px;line-height:1;display:inline-flex;align-items:center;}
+.sendReportButton strong{font:inherit;color:#fff;line-height:1;display:inline-flex;align-items:center;}
+
+
+/* ===== Pantalla 20: filtro real Todos / No leídos ===== */
+.messageTabs{
+  border:0 !important;
+  border-radius:24px !important;
+  background:#f4effc !important;
+  padding:0 !important;
+  overflow:hidden !important;
+  box-shadow:none !important;
+}
+.messageTabs .tabItem{
+  height:100% !important;
+  border-radius:22px !important;
+  color:#0b1438 !important;
+  font-size:18px !important;
+  font-weight:750 !important;
+}
+.messageTabs .tabItem.active{
+  background:linear-gradient(135deg,#7c3aed,#6417f3) !important;
+  color:#fff !important;
+  box-shadow:0 8px 18px rgba(100,23,243,.22) !important;
+}
+.messageTabs .tabItem.active::after{display:none !important;}
+.messageTabs .tabBadge{
+  min-width:22px !important;
+  height:22px !important;
+  font-size:13px !important;
+  margin-left:8px !important;
+}
+.messagesHideRead{
+  position:absolute;
+  z-index:9;
+  pointer-events:none;
+  background:#fff;
+  border-radius:0;
+}
+
+
+/* Corrección Pantalla 20: al seleccionar No leídos, se oculta por completo la conversación leída. */
+.messagesHideRead{
+  position:absolute !important;
+  z-index:19 !important;
+  pointer-events:none !important;
+  background:#fff !important;
+  border-radius:0 !important;
+  box-shadow:0 -10px 18px #fff, 0 10px 18px #fff !important;
+}
+
+/* Pantalla 5: cubierta limpia para eliminar el icono ☰ */
+.hamburgerCover{
+  position:absolute;
+  z-index:12;
+  pointer-events:none;
+  background:#fff;
+  border-radius:14px;
+}

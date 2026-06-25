@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Huellitas · Prototipo interactivo</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="workspace">
+    <aside class="panel">
+      <h1>Huellitas</h1>
+      <p>Prototipo interactivo tipo Figma</p>
+      <button id="startBtn" class="primary">Iniciar prototipo</button>
+      <div class="hint">Haz clic en botones, pestañas, tarjetas y barra inferior.</div>
+      <nav id="screenList"></nav>
+    </aside>
+
+    <section class="phoneArea">
+      <div class="phoneFrame">
+        <div id="screenStage">
+          <img id="screenImg" alt="Pantalla del prototipo Huellitas" />
+          <div id="hotspots"></div>
+          <div id="selectionLayer"></div>
+        </div>
+        <div id="toast" role="status"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
